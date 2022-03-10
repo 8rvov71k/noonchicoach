@@ -53,6 +53,8 @@ aiffel 대전 2기 해커톤 3차 기업프로젝트
 ---
 
 ## 레퍼런스
+- [https://github.com/MVIG-SJTU/AlphaPose](https://github.com/MVIG-SJTU/AlphaPose)
+- [yolov5](https://github.com/ultralytics/yolov5)
 - [2D Human Pose Estimation](https://paperswithcode.com/task/2d-human-pose-estimation)
 - [Human Pose Estimation Technology 2021 Guide](https://mobidev.biz/blog/human-pose-estimation-ai-personal-fitness-coach)
 - [Introduction to Human Pose Estimation](http://dmqm.korea.ac.kr/activity/seminar/311)
