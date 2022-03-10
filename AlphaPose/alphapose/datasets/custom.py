@@ -107,13 +107,19 @@ class CustomDataset(data.Dataset):
         self._items, self._labels = self._lazy_load_json()
 
     def __getitem__(self, idx):
-        # get image id
+        # get image id        
         if type(self._items[idx]) == dict:
             img_path = self._items[idx]['path']
             img_id = self._items[idx]['id']
         else:
             img_path = self._items[idx]
-            img_id = int(os.path.splitext(os.path.basename(img_path))[0])
+            img_id_meta = os.path.splitext(os.path.basename(img_path))[0]
+            
+            try:
+                img_id = int(img_id_meta)
+            except ValueError:
+                img_id = str(img_id_meta).split('_')[1]
+                img_pose_class = str(img_id_meta).split('_')[0]
 
         # load ground truth, including bbox, keypoints, image size
         label = copy.deepcopy(self._labels[idx])

@@ -18,9 +18,11 @@ from .halpe_68_noface_det import Halpe_68_noface_det
 from .single_hand import SingleHand
 from .single_hand_det import SingleHand_det
 
+from .airiss_coco import AirissCoco
+
 __all__ = ['CustomDataset', 'ConcatDataset', 'Mpii', 'Mscoco', 'Mscoco_det', \
 		   'Halpe_26', 'Halpe_26_det', 'Halpe_136', 'Halpe_136_det', \
 		   'Halpe_coco_wholebody_26', 'Halpe_coco_wholebody_26_det', \
 		   'Halpe_coco_wholebody_136', 'Halpe_coco_wholebody_136_det', \
 		   'Halpe_68_noface', 'Halpe_68_noface_det', 'SingleHand', 'SingleHand_det', \
-		   'coco_wholebody', 'coco_wholebody_det']
+		   'coco_wholebody', 'coco_wholebody_det', 'AirissCoco']

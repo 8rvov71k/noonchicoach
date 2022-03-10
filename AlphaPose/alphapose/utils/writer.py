@@ -96,6 +96,7 @@ class DataWriter():
         while True:
             # ensure the queue is not empty and get item
             (boxes, scores, ids, hm_data, cropped_boxes, orig_img, im_name) = self.wait_and_get(self.result_queue)
+            # print('hm_data :: ', hm_data)
             if orig_img is None:
                 # if the thread indicator variable is set (img is None), stop the thread
                 if self.save_video:
@@ -124,6 +125,9 @@ class DataWriter():
                     self.eval_joints = [*range(0,68)]
                 elif hm_data.size()[1] == 21:
                     self.eval_joints = [*range(0,21)]
+                elif hm_data.size()[1] == 18:   # airiss coco
+                    self.eval_joints = [*range(0,18)]
+                    # print('eval joints : ', self.eval_joints)
                 pose_coords = []
                 pose_scores = []
                 for i in range(hm_data.shape[0]):
@@ -133,6 +137,7 @@ class DataWriter():
                             hm_data[i][self.eval_joints[:-face_hand_num]], bbox, hm_shape=hm_size, norm_type=norm_type)
                         pose_coords_face_hand, pose_scores_face_hand = self.heatmap_to_coord[1](
                             hm_data[i][self.eval_joints[-face_hand_num:]], bbox, hm_shape=hm_size, norm_type=norm_type)
+                        print("bodyfoot , face hand : ", pose_coords_body_foot.shape, pose_coords_face_hand.shape)
                         pose_coord = np.concatenate((pose_coords_body_foot, pose_coords_face_hand), axis=0)
                         pose_score = np.concatenate((pose_scores_body_foot, pose_scores_face_hand), axis=0)
                     else:
@@ -147,6 +152,7 @@ class DataWriter():
 
                 _result = []
                 for k in range(len(scores)):
+                    # print('final kps : ', len(preds_img[k]))
                     _result.append(
                         {
                             'keypoints':preds_img[k],

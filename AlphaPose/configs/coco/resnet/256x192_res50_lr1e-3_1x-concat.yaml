@@ -4,9 +4,9 @@ DATASET:
     SET_LIST:
       - TYPE: 'Mscoco'
         MASK_ID: 0
-        ROOT: './data/coco/'
+        ROOT: './'
         IMG_PREFIX: 'train2017'
-        ANN: 'annotations/person_keypoints_train2017.json'
+        ANN: 'data/annotations/person_keypoints_train2017.json'
         AUG:
           FLIP: true
           ROT_FACTOR: 40
@@ -26,15 +26,15 @@ DATASET:
           PROB_HALF_BODY: -1
   VAL:
     TYPE: 'Mscoco'
-    ROOT: './data/coco/'
+    ROOT: './'
     IMG_PREFIX: 'val2017'
-    ANN: 'annotations/person_keypoints_val2017.json'
+    ANN: 'data/annotations/person_keypoints_val2017.json'
   TEST:
     TYPE: 'Mscoco_det'
-    ROOT: './data/coco/'
+    ROOT: './'
     IMG_PREFIX: 'val2017'
     DET_FILE: './exp/json/test_det_yolo.json'
-    ANN: 'annotations/person_keypoints_val2017.json'
+    ANN: ''
 DATA_PRESET:
   TYPE: 'simple'
   SIGMA: 2
@@ -47,7 +47,14 @@ DATA_PRESET:
   - 48
 MODEL:
   TYPE: 'FastPose'
-  PRETRAINED: ''
+  # Trouble shooting 
+  # size mismatch for conv_out.weight:
+  # size mismatch for conv_out.bias:
+  # ==> Pretrained : weight만 가지고옴.
+  # ==> (Check?) Try_load : 외부 model을 빌드를 할 수 있게 함.
+
+
+  PRETRAINED: './pretrained_models/coco_wholebody133_fast50_regression_256x192.pth'
   TRY_LOAD: ''
   NUM_DECONV_FILTERS:
   - 256
@@ -56,7 +63,7 @@ MODEL:
   NUM_LAYERS: 50
 LOSS:
   TYPE: 'MSELoss'
-DETECTOR:
+DETECTOR: # 건들지 안흔다.
   NAME: 'yolo'
   CONFIG: 'detector/yolo/cfg/yolov3-spp.cfg'
   WEIGHTS: 'detector/yolo/data/yolov3-spp.weights'

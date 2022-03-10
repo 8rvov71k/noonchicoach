@@ -15,8 +15,8 @@ from .custom import CustomDataset
 
 
 @DATASET.register_module
-class Mscoco(CustomDataset):
-    """ COCO Person dataset.
+class AirissCoco(CustomDataset):
+    """ COCO Person with Racket
 
     Parameters
     ----------
@@ -29,10 +29,30 @@ class Mscoco(CustomDataset):
         If true, will activate `dpg` for data augmentation.
     """
     CLASSES = ['person']
-    EVAL_JOINTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]    # 137개
-    num_joints = 17
+    EVAL_JOINTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    num_joints = 18
     joint_pairs = [[1, 2], [3, 4], [5, 6], [7, 8],
-                   [9, 10], [11, 12], [13, 14], [15, 16]]   # = skelelton 과 같음.
+                   [9, 10], [11, 12], [13, 14], [15, 16], [10,17]]   # = skeleton 과 같음.
+
+
+#    0'nose',
+#    1'left_eye',
+#    2'right_eye',
+#    3'left_ear',
+#    4'right_ear',
+#    5'left_shoulder',
+#    6'right_shoulder',
+#    7'left_elbow',
+#    8'right_elbow',
+#    9'left_wrist',
+#    10'right_wrist',
+#    11'left_hip',
+#    12'right_hip',
+#    13'left_knee',
+#    14'right_knee',
+#    15'left_ankle',
+#    16'right_ankle',
+#    17'racket
 
     def _load_jsons(self):
         """Load all image paths and labels from JSON annotation files into buffer."""
@@ -49,9 +69,9 @@ class Mscoco(CustomDataset):
         # iterate through the annotations
         image_ids = sorted(_coco.getImgIds())
         for entry in _coco.loadImgs(image_ids):
-            dirname, filename = entry['coco_url'].split('/')[-2:]
+            dirname, filename = entry['path'].split('/')[-2:]
             abs_path = os.path.join(self._root, dirname, filename)
-            if not os.path.exists(abs_path):
+            if not os.path.exists(abs_path):                
                 raise IOError('Image: {} not exists.'.format(abs_path))
             label = self._check_load_keypoints(_coco, entry)
             if not label:
@@ -85,8 +105,8 @@ class Mscoco(CustomDataset):
             # require non-zero box area
             if obj['area'] <= 0 or xmax <= xmin or ymax <= ymin:
                 continue
-            if obj['num_keypoints'] == 0:
-                continue
+            # if obj['num_keypoints'] == 0:
+            #     continue
             # joints 3d: (num_joints, 3, 2); 3 is for x, y, z; 2 is for position, visibility
             joints_3d = np.zeros((self.num_joints, 3, 2), dtype=np.float32)
             for i in range(self.num_joints):

@@ -34,7 +34,7 @@ DATA_PRESET:
 MODEL:
   TYPE: 'FastPose'
   PRETRAINED: ''
-  TRY_LOAD: ''
+  TRY_LOAD: 'pretrained_models/simple_res50_256x192.pth'
   NUM_DECONV_FILTERS:
   - 256
   - 256

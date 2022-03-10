@@ -104,6 +104,7 @@ venv.bak/
 .vscode
 .tensorboard
 exp/coco*
+exp/
 *.pth
 *.weights
 exp/json/test_kpt.json
@@ -116,3 +117,7 @@ exp/json
 tmp_*/
 example/res/
 data/
+airiss-data/
+wandb/
+.eggs
+trackers/

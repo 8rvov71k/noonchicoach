@@ -196,7 +196,6 @@ def vis_frame_fast(frame, im_res, opt, vis_thres, format='coco'):
         if kp_num == 17:
             kp_preds = torch.cat((kp_preds, torch.unsqueeze((kp_preds[5, :] + kp_preds[6, :]) / 2, 0)))
             kp_scores = torch.cat((kp_scores, torch.unsqueeze((kp_scores[5, :] + kp_scores[6, :]) / 2, 0)))
-            vis_thres.append(vis_thres[-1])
         if opt.pose_track or opt.tracking:
             color = get_color_fast(int(abs(human['idx'])))
         else:
@@ -265,7 +264,7 @@ def vis_frame(frame, im_res, opt, vis_thres, format='coco'):
             l_pair = [
                 (0, 1), (0, 2), (1, 3), (2, 4),  # Head
                 (5, 6), (5, 7), (7, 9), (6, 8), (8, 10),
-                (17, 11), (17, 12),  # Body
+                (17, 11), (17, 12),  # Body,    Neck: 17
                 (11, 13), (12, 14), (13, 15), (14, 16)
             ]
 
@@ -286,6 +285,43 @@ def vis_frame(frame, im_res, opt, vis_thres, format='coco'):
             line_color = [PURPLE, BLUE, BLUE, RED, RED, BLUE, BLUE, RED, RED, PURPLE, PURPLE, RED, RED, BLUE, BLUE]
         else:
             raise NotImplementedError
+    elif kp_num == 18:  # airiss coco
+        # coco kps 17 case 비슷함, 
+
+        #    0'nose',
+        #    1'left_eye',
+        #    2'right_eye',
+        #    3'left_ear',
+        #    4'right_ear',
+        #    5'left_shoulder',
+        #    6'right_shoulder',
+        #    7'left_elbow',
+        #    8'right_elbow',
+        #    9'left_wrist',
+        #    10'right_wrist',
+        #    11'left_hip',
+        #    12'right_hip',
+        #    13'left_knee',
+        #    14'right_knee',
+        #    15'left_ankle',
+        #    16'right_ankle',
+        #    17'racket
+        l_pair = [
+            (0, 1), (0, 2), (1, 3), (2, 4),  # Head
+            (5, 6), (5, 7), (7, 9), (6, 8), (8, 10), (10, 17), # racket
+            (0, 11), (0, 12),  # Body 
+            (11, 13), (12, 14), (13, 15), (14, 16)            
+        ]
+
+        p_color = [(0, 255, 255), (0, 191, 255), (0, 255, 102), (0, 77, 255), (0, 255, 0),  # Nose, LEye, REye, LEar, REar
+                    (77, 255, 255), (77, 255, 204), (77, 204, 255), (191, 255, 77), (77, 191, 255), (191, 255, 77),  # LShoulder, RShoulder, LElbow, RElbow, LWrist, RWrist
+                    (204, 77, 255), (77, 255, 204), (191, 77, 255), (77, 255, 191), (127, 77, 255), (77, 255, 127), (0, 255, 255), # LHip, RHip, LKnee, Rknee, LAnkle, RAnkle, Neck,
+                    (0, 255, 255)]  # Racket
+        line_color = [(0, 215, 255), (0, 255, 204), (0, 134, 255), (0, 255, 50),
+                        (77, 255, 222), (77, 196, 255), (77, 135, 255), (191, 255, 77), (77, 255, 77),
+                        (77, 222, 255), (255, 156, 127),
+                        (0, 127, 255), (255, 127, 77), (0, 77, 255), (255, 77, 36) , (0, 77, 255)]
+    
     elif kp_num == 136:
         l_pair = [
             (0, 1), (0, 2), (1, 3), (2, 4),  # Head
@@ -415,7 +451,6 @@ def vis_frame(frame, im_res, opt, vis_thres, format='coco'):
         if kp_num == 17:
             kp_preds = torch.cat((kp_preds, torch.unsqueeze((kp_preds[5, :] + kp_preds[6, :]) / 2, 0)))
             kp_scores = torch.cat((kp_scores, torch.unsqueeze((kp_scores[5, :] + kp_scores[6, :]) / 2, 0)))
-            vis_thres.append(vis_thres[-1])
         if opt.tracking:
             color = get_color_fast(int(abs(human['idx'])))
         else:

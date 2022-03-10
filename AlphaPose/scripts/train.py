@@ -16,6 +16,12 @@ from alphapose.utils.logger import board_writing, debug_writing
 from alphapose.utils.metrics import DataLogger, calc_accuracy, calc_integral_accuracy, evaluate_mAP
 from alphapose.utils.transforms import get_func_heatmap_to_coord
 
+from torchsummary import summary
+
+# wandb
+# + 3가지 부분만 추가하면 된다. init, config, (watch + log) , + hyper tuning
+import wandb
+
 num_gpu = torch.cuda.device_count()
 valid_batch = 1 * num_gpu
 if opt.sync:
@@ -48,7 +54,7 @@ def train(opt, train_loader, m, criterion, optimizer, writer):
             label_masks = label_masks.cuda()
 
         output = m(inps)
-
+        
         if cfg.LOSS.get('TYPE') == 'MSELoss':
             loss = 0.5 * criterion(output.mul(label_masks), labels.mul(label_masks))
             acc = calc_accuracy(output.mul(label_masks), labels.mul(label_masks))
@@ -251,10 +257,19 @@ def main():
     logger.info('******************************')
     logger.info(cfg)
     logger.info('******************************')
+    
+    wandb.init(project="alphapose-test", entity="kimimgo")
+    wandb.config.update(cfg)
 
     # Model Initialize
     m = preset_model(cfg)
     m = nn.DataParallel(m).cuda()
+
+    # summary
+    print(m)
+
+    # wandb watch
+    wandb.watch(m)
 
     combined_loss = (cfg.LOSS.get('TYPE') == 'Combined')
     if combined_loss:
@@ -272,6 +287,7 @@ def main():
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=cfg.TRAIN.LR_STEP, gamma=cfg.TRAIN.LR_FACTOR)
 
+
     writer = SummaryWriter('.tensorboard/{}-{}'.format(opt.exp_id, cfg.FILE_NAME))
 
     train_dataset = builder.build_dataset(cfg.DATASET.TRAIN, preset_cfg=cfg.DATA_PRESET, train=True)
@@ -281,6 +297,7 @@ def main():
     heatmap_to_coord = get_func_heatmap_to_coord(cfg)
 
     opt.trainIters = 0
+    
 
     for i in range(cfg.TRAIN.BEGIN_EPOCH, cfg.TRAIN.END_EPOCH):
         opt.epoch = i
@@ -290,9 +307,9 @@ def main():
 
         # Training
         loss, miou = train(opt, train_loader, m, criterion, optimizer, writer)
-        logger.epochInfo('Train', opt.epoch, loss, miou)
+        logger.epochInfo('Train', opt.epoch, loss, miou)       
 
-        lr_scheduler.step()
+        lr_scheduler.step()        
 
         if (i + 1) % opt.snapshot == 0:
             # Save checkpoint
@@ -315,20 +332,24 @@ def main():
             train_loader = torch.utils.data.DataLoader(
                 train_dataset, batch_size=cfg.TRAIN.BATCH_SIZE * num_gpu, shuffle=True, num_workers=opt.nThreads)
 
+        wandb.log({ "loss": loss, "acc": miou})
+        
+
     torch.save(m.module.state_dict(), './exp/{}-{}/final_DPG.pth'.format(opt.exp_id, cfg.FILE_NAME))
 
 
 def preset_model(cfg):
     model = builder.build_sppe(cfg.MODEL, preset_cfg=cfg.DATA_PRESET)
 
-    if cfg.MODEL.PRETRAINED:
+    if cfg.MODEL.PRETRAINED:    # only weight
         logger.info(f'Loading model from {cfg.MODEL.PRETRAINED}...')
         model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED))
-    elif cfg.MODEL.TRY_LOAD:
+    elif cfg.MODEL.TRY_LOAD:    # model architecture & weight
         logger.info(f'Loading model from {cfg.MODEL.TRY_LOAD}...')
         pretrained_state = torch.load(cfg.MODEL.TRY_LOAD)
         model_state = model.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items()
+
+        pretrained_state = {k: v for k, v in pretrained_state.items()       # 이유가 있음 : block 단위로 
                             if k in model_state and v.size() == model_state[k].size()}
 
         model_state.update(pretrained_state)

@@ -31,6 +31,7 @@ class SimplePose(nn.Module):
         self.preact.load_state_dict(model_state)
 
         self.deconv_layers = self._make_deconv_layer()
+        print('num of joints, output dim : ', self._preset_cfg['NUM_JOINTS'])
         self.final_layer = nn.Conv2d(
             self.deconv_dim[2], self._preset_cfg['NUM_JOINTS'], kernel_size=1, stride=1, padding=0)
 
